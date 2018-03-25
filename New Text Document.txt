@@ -1,0 +1,86 @@
+import React, { Component, PropTypes } from 'react';
+import { render } from 'react-dom';
+import Hello from './Hello';
+import './style.css';
+import Avatar from 'material-ui/Avatar';
+import {List, ListItem} from 'material-ui/List';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import axios from 'axios';
+import Ajax from 'react-ajax'; 
+import RaisedButton from 'material-ui/RaisedButton';
+import Subdetails from './component';
+import AutoComplete from 'material-ui/AutoComplete';
+class App extends Component {
+constructor() {
+super();
+this.state = {
+details: [],
+data:{},
+flag:false
+};
+}
+componentDidMount(){
+axios({
+method:'get',
+url:'https://api.github.com/users'
+}).then((response)=>{
+this.setState({details:response.data})
+}).catch((err)=>{
+console.log(err)
+})
+}
+selectedUser(chosenRequest, index)
+{
+console.log(this.state.details[index])
+this.setState({data:this.state.details[index],flag:!this.state.flag});
+}
+back()
+{
+this.setState({flag:!this.state.flag})
+}
+render() {
+return (
+<div>
+   <MuiThemeProvider>
+      {this.state.flag ?
+      <div>
+         {Object.keys(this.state.data).map((details,index)=>
+         <div key={index}>
+            {details} : {this.state.data[details]}
+         </div>
+         )}
+         <RaisedButton label="Back" secondary={true}  onClick={()=>
+         this.back()}/>
+      </div>
+      :  
+      <div>
+         <AutoComplete
+            dataSource={this.state.details}
+            floatingLabelText="Full width"
+            fullWidth={true}
+            onNewRequest={(chosenRequest, index)=>
+         this.selectedUser(chosenRequest, index) } 
+         dataSourceConfig={{ text: 'login', value: 'id'}}
+         filter={(searchText, key) => searchText !== '' && key.indexOf(searchText) !== -1}
+         />
+      </div>
+      }
+   </MuiThemeProvider>
+</div>
+);
+}
+}
+render(
+<App />
+, document.getElementById('root'));
+// dataSourceConfig={this.dataSourceConfig}
+// var updatedDataSource = [];
+// for (var i = 0; i < response.length; ++i) 
+// {
+//   var _name = response[i].name;
+//   var _size = response[i].size;
+//   var _val = 
+//<MenuItem primaryText={_name} secondaryText={_size}/>
+//   updatedDataSource.push({text:response[i].name, value:(_val), valueKey:response[i].id, validationKey:'validation string here'});
+// }
+// this.setState({dataSourceDrug:updatedDataSource});
